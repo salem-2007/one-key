@@ -396,7 +396,14 @@ export function routeRequest(estimatedTokens = 1000, skipKeys?: Set<string>, pre
     if (entry.context_window != null && estimatedTokens > entry.context_window) continue;
 
     // Check if we have a provider for this platform
-    const provider = getProvider(entry.platform as any);
+    let provider = getProvider(entry.platform as any);
+    if (!provider && (entry.platform === 'custom' || entry.platform.startsWith('custom_'))) {
+      // For custom platforms, get the base_url from api_keys
+      const customKey = db.prepare('SELECT base_url FROM api_keys WHERE platform = ? AND enabled = 1 LIMIT 1').get(entry.platform) as any;
+      if (customKey?.base_url) {
+        provider = resolveProvider(entry.platform as any, customKey.base_url);
+      }
+    }
     if (!provider) continue;
 
     // Get enabled keys that have not already failed validation or decryption.

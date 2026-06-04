@@ -73,33 +73,34 @@ describe('POST /api/keys/custom (#117)', () => {
       baseUrl: 'http://127.0.0.1:11434/v1/',
       model: 'qwen3:4b',
       displayName: 'Local Qwen3 4B',
+      label: 'Test Ollama',
     });
     expect(status).toBe(201);
-    expect(body.platform).toBe('custom');
+    expect(body.platform).toBe('custom_test_ollama');
     expect(body.baseUrl).toBe('http://127.0.0.1:11434/v1'); // trailing slash trimmed
     expect(body.model).toBe('qwen3:4b');
 
     const db = getDb();
-    const key = db.prepare("SELECT * FROM api_keys WHERE platform = 'custom'").get() as any;
+    const key = db.prepare("SELECT * FROM api_keys WHERE platform = 'custom_test_ollama'").get() as any;
     expect(key.base_url).toBe('http://127.0.0.1:11434/v1');
-    const model = db.prepare("SELECT * FROM models WHERE platform = 'custom' AND model_id = 'qwen3:4b'").get() as any;
+    const model = db.prepare("SELECT * FROM models WHERE platform = 'custom_test_ollama' AND model_id = 'qwen3:4b'").get() as any;
     expect(model).toBeDefined();
     const fc = db.prepare('SELECT * FROM fallback_config WHERE model_db_id = ?').get(model.id);
     expect(fc).toBeDefined();
   });
 
   it('reuses the single custom key when a second model is added', async () => {
-    await post(app, '/api/keys/custom', { baseUrl: 'http://127.0.0.1:11434/v1', model: 'llama3:8b' });
+    await post(app, '/api/keys/custom', { baseUrl: 'http://127.0.0.1:11434/v1', model: 'llama3:8b', label: 'Test Ollama' });
     const db = getDb();
-    const keys = db.prepare("SELECT * FROM api_keys WHERE platform = 'custom'").all();
+    const keys = db.prepare("SELECT * FROM api_keys WHERE platform = 'custom_test_ollama'").all();
     expect(keys.length).toBe(1); // not a second key
-    const models = db.prepare("SELECT * FROM models WHERE platform = 'custom'").all();
+    const models = db.prepare("SELECT * FROM models WHERE platform = 'custom_test_ollama'").all();
     expect(models.length).toBe(2);
   });
 
   it('surfaces baseUrl in the keys listing', async () => {
     const { body } = await get(app, '/api/keys');
-    const custom = body.find((k: any) => k.platform === 'custom');
+    const custom = body.find((k: any) => k.platform === 'custom_test_ollama');
     expect(custom.baseUrl).toBe('http://127.0.0.1:11434/v1');
   });
 
@@ -107,7 +108,7 @@ describe('POST /api/keys/custom (#117)', () => {
     // The seeded built-in models have no keys, so the only routable model is
     // the custom one we registered above.
     const route = routeRequest(1000);
-    expect(route.platform).toBe('custom');
+    expect(route.platform).toBe('custom_test_ollama');
     expect((route.provider as any).baseUrl).toBe('http://127.0.0.1:11434/v1');
     expect(['qwen3:4b', 'llama3:8b']).toContain(route.modelId);
   });

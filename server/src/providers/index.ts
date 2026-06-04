@@ -190,11 +190,11 @@ export function getProvider(platform: Platform): BaseProvider | undefined {
  * a custom provider with no base URL configured.
  */
 export function resolveProvider(platform: Platform, baseUrl?: string | null): BaseProvider | undefined {
-  if (platform === 'custom') {
+  if (platform === 'custom' || platform.startsWith('custom_')) {
     const trimmed = baseUrl?.trim();
     if (!trimmed) return undefined;
     return new OpenAICompatProvider({
-      platform: 'custom',
+      platform: platform,
       name: 'Custom (OpenAI-compatible)',
       baseUrl: trimmed,
       timeoutMs: CUSTOM_PROVIDER_TIMEOUT_MS,

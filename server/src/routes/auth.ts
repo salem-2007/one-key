@@ -83,8 +83,8 @@ authRouter.post('/reset-password', (req: Request, res: Response) => {
 // /logout and /me validate the token themselves.
 
 const credentialsSchema = z.object({
-  email: z.string().min(1, '请输入用户名'),
-  password: z.string().min(1, '请输入密码'),
+  email: z.string().min(1, '请输入用户名').email('请输入有效的邮箱地址'),
+  password: z.string().min(8, '密码至少需要8个字符'),
 });
 
 const changePasswordSchema = z.object({
