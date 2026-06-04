@@ -48,102 +48,1107 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+    --radius-full: 9999px;
+    --animate-accordion-down: accordion-down 0.2s ease-out;
+    --animate-accordion-up: accordion-up 0.2s ease-out;
 }
 
-:root {
-    --background: oklch(0.995 0 0);
-    --foreground: oklch(0.18 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.18 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.18 0 0);
-    --primary: oklch(0.22 0 0);
-    --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.22 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.52 0 0);
-    --accent: oklch(0.96 0 0);
-    --accent-foreground: oklch(0.22 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0 0);
-    --input: oklch(0.92 0 0);
-    --ring: oklch(0.55 0 0);
-    --chart-1: oklch(0.28 0 0);
-    --chart-2: oklch(0.45 0 0);
-    --chart-3: oklch(0.6 0 0);
-    --chart-4: oklch(0.75 0 0);
-    --chart-5: oklch(0.87 0 0);
-    --radius: 0.5rem;
-    --sidebar: oklch(0.98 0 0);
-    --sidebar-foreground: oklch(0.18 0 0);
-    --sidebar-primary: oklch(0.22 0 0);
-    --sidebar-primary-foreground: oklch(0.98 0 0);
-    --sidebar-accent: oklch(0.96 0 0);
-    --sidebar-accent-foreground: oklch(0.22 0 0);
-    --sidebar-border: oklch(0.92 0 0);
-    --sidebar-ring: oklch(0.55 0 0);
-}
+@layer base {
+    :root {
+        --radius: 0.75rem;
+        --background: oklch(0.985 0.002 80);
+        --foreground: oklch(0.25 0.015 75);
+        --card: oklch(0.975 0.003 80);
+        --card-foreground: oklch(0.25 0.015 75);
+        --popover: oklch(0.975 0.003 80);
+        --popover-foreground: oklch(0.25 0.015 75);
+        --primary: oklch(0.45 0.15 265);
+        --primary-foreground: oklch(0.98 0.005 265);
+        --secondary: oklch(0.93 0.015 265);
+        --secondary-foreground: oklch(0.35 0.08 265);
+        --muted: oklch(0.935 0.006 80);
+        --muted-foreground: oklch(0.52 0.015 75);
+        --accent: oklch(0.93 0.015 265);
+        --accent-foreground: oklch(0.35 0.08 265);
+        --destructive: oklch(0.55 0.2 25);
+        --destructive-foreground: oklch(0.98 0.005 25);
+        --border: oklch(0.9 0.008 80);
+        --input: oklch(0.9 0.008 80);
+        --ring: oklch(0.45 0.15 265);
+        --sidebar-ring: oklch(0.45 0.15 265);
+        --sidebar-border: oklch(0.9 0.008 80);
+        --sidebar-accent-foreground: oklch(0.35 0.08 265);
+        --sidebar-accent: oklch(0.93 0.015 265);
+        --sidebar-primary-foreground: oklch(0.98 0.005 265);
+        --sidebar-primary: oklch(0.45 0.15 265);
+        --sidebar-foreground: oklch(0.3 0.015 75);
+        --sidebar: oklch(0.975 0.003 80);
+        --sidebar-primary-foreground: oklch(0.98 0.005 265);
+        --chart-1: oklch(0.55 0.18 265);
+        --chart-2: oklch(0.6 0.16 285);
+        --chart-3: oklch(0.5 0.12 245);
+        --chart-4: oklch(0.65 0.14 305);
+        --chart-5: oklch(0.58 0.2 25);
+    }
 
-.dark {
-    --background: oklch(0.135 0 0);
-    --foreground: oklch(0.98 0 0);
-    --card: oklch(0.175 0 0);
-    --card-foreground: oklch(0.98 0 0);
-    --popover: oklch(0.175 0 0);
-    --popover-foreground: oklch(0.98 0 0);
-    --primary: oklch(0.93 0 0);
-    --primary-foreground: oklch(0.18 0 0);
-    --secondary: oklch(0.24 0 0);
-    --secondary-foreground: oklch(0.98 0 0);
-    --muted: oklch(0.22 0 0);
-    --muted-foreground: oklch(0.68 0 0);
-    --accent: oklch(0.24 0 0);
-    --accent-foreground: oklch(0.98 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 14%);
-    --ring: oklch(0.6 0 0);
-    --chart-1: oklch(0.92 0 0);
-    --chart-2: oklch(0.78 0 0);
-    --chart-3: oklch(0.6 0 0);
-    --chart-4: oklch(0.45 0 0);
-    --chart-5: oklch(0.32 0 0);
-    --sidebar: oklch(0.175 0 0);
-    --sidebar-foreground: oklch(0.98 0 0);
-    --sidebar-primary: oklch(0.93 0 0);
-    --sidebar-primary-foreground: oklch(0.18 0 0);
-    --sidebar-accent: oklch(0.24 0 0);
-    --sidebar-accent-foreground: oklch(0.98 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.6 0 0);
+    .dark {
+        --background: oklch(0.15 0.015 265);
+        --foreground: oklch(0.92 0.01 265);
+        --card: oklch(0.18 0.02 265);
+        --card-foreground: oklch(0.92 0.01 265);
+        --popover: oklch(0.18 0.02 265);
+        --popover-foreground: oklch(0.92 0.01 265);
+        --primary: oklch(0.65 0.18 265);
+        --primary-foreground: oklch(0.15 0.02 265);
+        --secondary: oklch(0.25 0.03 265);
+        --secondary-foreground: oklch(0.75 0.1 265);
+        --muted: oklch(0.22 0.02 265);
+        --muted-foreground: oklch(0.62 0.03 265);
+        --accent: oklch(0.25 0.03 265);
+        --accent-foreground: oklch(0.75 0.1 265);
+        --destructive: oklch(0.6 0.2 25);
+        --destructive-foreground: oklch(0.15 0.01 25);
+        --border: oklch(0.28 0.025 265);
+        --input: oklch(0.28 0.025 265);
+        --ring: oklch(0.65 0.18 265);
+        --sidebar-ring: oklch(0.65 0.18 265);
+        --sidebar-border: oklch(0.28 0.025 265);
+        --sidebar-accent-foreground: oklch(0.75 0.1 265);
+        --sidebar-accent: oklch(0.25 0.03 265);
+        --sidebar-primary-foreground: oklch(0.15 0.02 265);
+        --sidebar-primary: oklch(0.65 0.18 265);
+        --sidebar-foreground: oklch(0.82 0.015 265);
+        --sidebar: oklch(0.16 0.018 265);
+        --sidebar-primary-foreground: oklch(0.15 0.02 265);
+        --chart-1: oklch(0.65 0.18 265);
+        --chart-2: oklch(0.7 0.16 285);
+        --chart-3: oklch(0.6 0.12 245);
+        --chart-4: oklch(0.75 0.14 305);
+        --chart-5: oklch(0.6 0.2 25);
+    }
 }
 
 @layer base {
     * {
-        @apply border-border outline-ring/50;
-    }
-    html {
-        @apply font-sans antialiased;
-        font-feature-settings: 'ss01', 'cv11';
-        text-rendering: optimizeLegibility;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        @apply border-border;
     }
     body {
         @apply bg-background text-foreground;
-        font-feature-settings: 'ss01', 'cv11', 'tnum';
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
-    code, pre, kbd, samp {
-        font-family: var(--font-mono);
-        font-feature-settings: 'ss02', 'ss03';
+}
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes accordion-down { from { height: 0; } to { height: var(--radix-accordion-content-height); } }
+@keyframes accordion-up { from { height: var(--radix-accordion-content-height); } to { height: 0; } }
+
+/* ── 柠柚风格：登录页 ─────────────────────────────────────────────── */
+.ningyou-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: visible;
+    padding: 24px;
+    background: var(--page-bg, linear-gradient(180deg, #f7fbff 0%, #ecf3ff 46%, #eaf1ff 100%));
+}
+.dark .ningyou-login-page {
+    background: var(--page-bg, linear-gradient(180deg, #07101e 0%, #091425 42%, #0b1628 100%));
+}
+
+.ningyou-orb {
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 0;
+}
+.ningyou-orb-a {
+    width: 380px; height: 380px;
+    top: -80px; right: -100px;
+    background: radial-gradient(circle, rgba(124, 140, 255, .28), transparent 70%);
+    filter: blur(18px);
+}
+.ningyou-orb-b {
+    width: 300px; height: 300px;
+    left: -80px; bottom: -60px;
+    background: radial-gradient(circle, rgba(88, 214, 255, .22), transparent 72%);
+    filter: blur(18px);
+}
+.ningyou-orb-c {
+    width: 200px; height: 200px;
+    left: 32%; top: 28%;
+    background: radial-gradient(circle, rgba(255, 178, 219, .16), transparent 72%);
+    filter: blur(18px);
+}
+
+.ningyou-auth-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 1.1fr minmax(340px, 440px);
+    gap: 24px;
+    align-items: stretch;
+}
+
+/* 左侧介绍面板 */
+.ningyou-intro-panel {
+    border: 1px solid rgba(255, 255, 255, .52);
+    border-radius: 32px;
+    background: rgba(255, 255, 255, .56);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 24px 60px rgba(76, 110, 196, .18);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 600px;
+}
+.dark .ningyou-intro-panel {
+    background: rgba(14, 23, 42, .5);
+    border-color: rgba(184, 214, 255, .16);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .42);
+}
+
+.ningyou-eyebrow {
+    display: inline-flex;
+    width: fit-content;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(124, 140, 255, .15);
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.ningyou-hero-title {
+    margin: 20px 0 0;
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ningyou-hero-subtitle {
+    margin: 16px 0 0;
+    line-height: 1.8;
+    color: var(--muted-foreground);
+    font-size: 1rem;
+}
+
+.ningyou-features {
+    display: grid;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.ningyou-feature-card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .16);
+    transition: all 0.2s ease;
+}
+.ningyou-feature-card:hover {
+    background: rgba(255, 255, 255, .14);
+    transform: translateY(-2px);
+}
+.dark .ningyou-feature-card {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .1);
+}
+
+.ningyou-feature-icon {
+    width: 42px; height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: rgba(124, 140, 255, .18);
+    color: var(--primary);
+}
+
+.ningyou-feature-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--foreground);
+}
+.ningyou-feature-card p {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+}
+
+.ningyou-footer-text {
+    font-size: 0.78rem;
+    color: var(--muted-foreground);
+    opacity: 0.6;
+}
+
+/* 右侧表单卡片 */
+.ningyou-glass-card {
+    border: 1px solid rgba(255, 255, 255, .52);
+    border-radius: 32px;
+    background: rgba(255, 255, 255, .56);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 24px 60px rgba(76, 110, 196, .18);
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.dark .ningyou-glass-card {
+    background: rgba(14, 23, 42, .5);
+    border-color: rgba(184, 214, 255, .16);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .42);
+}
+
+.ningyou-auth-header {
+    margin-bottom: 28px;
+}
+
+.ningyou-form-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .2);
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    font-weight: 500;
+    margin-bottom: 18px;
+}
+.dark .ningyou-form-badge {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .12);
+}
+
+.ningyou-auth-title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--foreground);
+    letter-spacing: -0.02em;
+}
+
+.ningyou-auth-subtitle {
+    margin: 8px 0 0;
+    font-size: 0.92rem;
+    color: var(--muted-foreground);
+}
+
+/* 表单 */
+.ningyou-auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ningyou-form-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.ningyou-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.ningyou-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ningyou-input {
+    height: 44px;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, .14) !important;
+    border: 1px solid rgba(255, 255, 255, .2) !important;
+    padding: 0 16px;
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
+}
+.ningyou-input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+}
+.dark .ningyou-input {
+    background: rgba(255, 255, 255, .08) !important;
+    border-color: rgba(184, 214, 255, .16) !important;
+}
+
+.ningyou-password-wrapper {
+    position: relative;
+}
+.ningyou-eye-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted-foreground);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+}
+.ningyou-eye-btn:hover {
+    color: var(--foreground);
+}
+
+.ningyou-forgot-link {
+    font-size: 0.82rem;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    transition: color 0.2s;
+}
+.ningyou-forgot-link:hover {
+    color: var(--primary);
+}
+
+.ningyou-token-row {
+    display: flex;
+    gap: 8px;
+}
+.ningyou-copy-btn {
+    flex-shrink: 0;
+    height: 44px;
+    width: 44px;
+    border-radius: 18px !important;
+}
+
+.ningyou-tip {
+    font-size: 0.82rem;
+    color: #d97706;
+    background: rgba(217, 119, 6, .1);
+    border: 1px solid rgba(217, 119, 6, .2);
+    border-radius: 14px;
+    padding: 10px 14px;
+}
+.dark .ningyou-tip {
+    color: #fbbf24;
+    background: rgba(217, 119, 6, .15);
+}
+
+.ningyou-error {
+    font-size: 0.82rem;
+    color: var(--destructive);
+    background: oklch(0.55 0.2 25 / 0.1);
+    border: 1px solid oklch(0.55 0.2 25 / 0.2);
+    border-radius: 14px;
+    padding: 10px 14px;
+}
+
+.ningyou-success {
+    font-size: 0.82rem;
+    color: #16a34a;
+    background: rgba(22, 163, 74, .1);
+    border: 1px solid rgba(22, 163, 74, .2);
+    border-radius: 14px;
+    padding: 10px 14px;
+}
+
+.ningyou-submit-btn {
+    height: 48px !important;
+    border-radius: 18px !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: linear-gradient(135deg, #6366f1, #7c3aed) !important;
+    border: none !important;
+    box-shadow: 0 16px 32px rgba(99, 102, 241, .25);
+    transition: all 0.2s ease;
+}
+.ningyou-submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 40px rgba(99, 102, 241, .3);
+}
+.ningyou-submit-btn:active {
+    transform: translateY(0);
+}
+
+.ningyou-back-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.2s;
+}
+.ningyou-back-link:hover {
+    color: var(--primary);
+    background: rgba(99, 102, 241, .08);
+}
+
+.ningyou-lang-toggle {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.ningyou-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted-foreground);
+}
+.ningyou-spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--muted);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.ningyou-error-card {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    border-radius: 18px;
+    background: oklch(0.55 0.2 25 / 0.08);
+    border: 1px solid oklch(0.55 0.2 25 / 0.2);
+    color: var(--destructive);
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+/* 响应式 */
+@media (max-width: 900px) {
+    .ningyou-auth-shell {
+        grid-template-columns: 1fr;
+        max-width: 460px;
     }
-    /* Tabular numerals on any element that opts in */
-    .tabular-nums {
-        font-variant-numeric: tabular-nums;
+    .ningyou-intro-panel {
+        display: none;
     }
-    /* Tighter focus ring across inputs */
-    input, textarea, select {
-        font-feature-settings: 'ss01';
+}
+@media (max-width: 480px) {
+    .ningyou-login-page {
+        padding: 16px 12px;
     }
+    .ningyou-glass-card {
+        border-radius: 26px;
+        padding: 28px 20px;
+    }
+}
+
+/* ── 柠柚风格：主布局侧边栏 ─────────────────────────────────────── */
+.ningyou-sidebar {
+    position: fixed;
+    inset-y: 0;
+    left: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255, 255, 255, .52);
+    background: rgba(255, 255, 255, .56);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 24px 60px rgba(76, 110, 196, .12);
+    transition: width 0.25s ease;
+    margin: 12px 0 12px 12px;
+    border-radius: 24px;
+    height: calc(100vh - 24px);
+}
+.dark .ningyou-sidebar {
+    background: rgba(14, 23, 42, .6);
+    border-color: rgba(184, 214, 255, .12);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .32);
+}
+
+.ningyou-nav-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 14px;
+    margin: 2px 8px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 40px;
+    flex-shrink: 0;
+}
+
+/* 侧边栏收起时的导航项 */
+.ningyou-sidebar.collapsed .ningyou-nav-item {
+    padding: 10px 0;
+    margin: 2px 4px;
+    justify-content: center;
+}
+
+.ningyou-sidebar.collapsed .ningyou-nav-item svg {
+    width: 20px;
+    height: 20px;
+}
+.ningyou-nav-item:hover {
+    background: rgba(99, 102, 241, .08);
+    color: var(--foreground);
+}
+.ningyou-nav-item.active {
+    background: linear-gradient(135deg, rgba(124, 140, 255, .22), rgba(124, 140, 255, .1));
+    color: var(--primary);
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+.dark .ningyou-nav-item.active {
+    background: linear-gradient(135deg, rgba(124, 140, 255, .18), rgba(124, 140, 255, .08));
+}
+
+/* ── 柠柚风格：顶部导航栏 ───────────────────────────────────────── */
+.ningyou-header {
+    position: fixed;
+    top: 12px;
+    right: 24px;
+    z-index: 30;
+    height: 64px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .56);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, .52);
+    box-shadow: 0 10px 30px rgba(76, 110, 196, .12);
+    transition: left 0.25s ease;
+    overflow: visible;
+}
+.dark .ningyou-header {
+    background: rgba(14, 23, 42, .6);
+    border-color: rgba(184, 214, 255, .12);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .28);
+}
+
+.ningyou-header-bar {
+    width: 100%;
+    height: 100%;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ningyou-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ningyou-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+.ningyou-header-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--muted-foreground);
+}
+
+.ningyou-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 10px #4ade808c;
+}
+
+.ningyou-header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ningyou-header-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(255, 255, 255, .3);
+    color: var(--muted-foreground);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.ningyou-header-pill:hover {
+    background: rgba(255, 255, 255, .7);
+    color: var(--foreground);
+}
+.dark .ningyou-header-pill {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .12);
+}
+.dark .ningyou-header-pill:hover {
+    background: rgba(255, 255, 255, .14);
+}
+
+.ningyou-header-pill-label {
+    font-weight: 500;
+}
+
+.ningyou-header-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(255, 255, 255, .3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.ningyou-header-profile:hover {
+    background: rgba(255, 255, 255, .7);
+    transform: translateY(-1px);
+}
+.dark .ningyou-header-profile {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .12);
+}
+
+.ningyou-header-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.ningyou-header-username {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+/* ── 顶栏功能按钮椭圆圈 ───────────────────────────────────── */
+.ningyou-header-pills-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, .3);
+}
+.dark .ningyou-header-pills-wrap {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .1);
+}
+
+/* ── 顶栏头像下拉菜单 ───────────────────────────────────── */
+.ningyou-header-profile-wrap {
+    position: relative;
+}
+
+.ningyou-header-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    padding: 8px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, .5);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .12);
+    z-index: 100;
+    animation: fadeInScale 0.15s ease;
+}
+.dark .ningyou-header-dropdown {
+    background: rgba(14, 23, 42, .9);
+    border-color: rgba(184, 214, 255, .12);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.ningyou-dropdown-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.ningyou-dropdown-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.ningyou-dropdown-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.ningyou-dropdown-email {
+    font-size: 0.76rem;
+    color: var(--muted-foreground);
+}
+
+.ningyou-dropdown-divider {
+    height: 1px;
+    background: rgba(0, 0, 0, .06);
+    margin: 4px 12px;
+}
+.dark .ningyou-dropdown-divider {
+    background: rgba(255, 255, 255, .08);
+}
+
+.ningyou-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    color: #ef4444;
+    font-size: 0.84rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.ningyou-dropdown-item:hover {
+    background: rgba(239, 68, 68, .08);
+}
+.dark .ningyou-dropdown-item:hover {
+    background: rgba(239, 68, 68, .12);
+}
+
+
+/* ── 柠柚风格：侧边栏账户区域 ───────────────────────────────────── */
+.ningyou-sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 16px 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.ningyou-sidebar-logo:hover {
+    opacity: 0.85;
+}
+
+.ningyou-logo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(99, 102, 241, .25);
+    flex-shrink: 0;
+}
+
+.ningyou-logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ningyou-sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 8px;
+}
+
+.ningyou-nav-label {
+    padding: 0 16px;
+    margin-bottom: 8px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted-foreground);
+    opacity: 0.6;
+}
+
+.ningyou-sidebar-account {
+    border-top: 1px solid rgba(255, 255, 255, .2);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.dark .ningyou-sidebar-account {
+    border-color: rgba(255, 255, 255, .08);
+}
+
+.ningyou-account-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .3);
+    border: 1px solid rgba(255, 255, 255, .2);
+}
+.dark .ningyou-account-card {
+    background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .08);
+}
+
+.ningyou-account-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.ningyou-account-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ningyou-account-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--foreground);
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: ellipsis;
+}
+
+.ningyou-account-email {
+    font-size: 0.72rem;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: ellipsis;
+}
+
+.ningyou-account-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+
+/* 侧边栏底部操作按钮 */
+.ningyou-sidebar-actions {
+  padding: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dark .ningyou-sidebar-actions {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.ningyou-account-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: transparent;
+    border: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.ningyou-account-btn:hover {
+    background: rgba(99, 102, 241, .1);
+    color: var(--foreground);
+}
+
+/* ── 柠柚风格：主内容区 ───────────────────────────────────────── */
+.ningyou-main {
+    position: relative;
+    z-index: 1;
+    padding: 100px 28px 24px;
+    transition: margin-left 0.25s ease;
+}
+
+/* ── 淡紫色流动发光背景 ───────────────────────────────────── */
+.ningyou-layout {
+    position: relative;
+    min-height: 100vh;
+}
+
+.ningyou-glow-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(124, 140, 255, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(196, 181, 253, 0.15) 0%, transparent 50%);
+    animation: glowFloat 20s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.dark .ningyou-glow-bg {
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(124, 140, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(196, 181, 253, 0.08) 0%, transparent 50%);
+}
+
+/* 也为body添加备用发光效果 */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(124, 140, 255, 0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(196, 181, 253, 0.1) 0%, transparent 50%);
+    animation: glowFloat 20s ease-in-out infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.dark body::after {
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(124, 140, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(196, 181, 253, 0.05) 0%, transparent 50%);
+}
+
+.dark .ningyou-layout::before {
+    background: 
+        radial-gradient(ellipse at 20% 50%, rgba(124, 140, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167, 139, 250, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(196, 181, 253, 0.04) 0%, transparent 50%);
+}
+
+@keyframes glowFloat {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(2%, -3%) rotate(1deg);
+    }
+    50% {
+        transform: translate(-1%, 2%) rotate(-0.5deg);
+    }
+    75% {
+        transform: translate(-2%, -1%) rotate(0.5deg);
+    }
+}
+
+/* ── 卡片悬停发光效果 ───────────────────────────────────── */
+.ningyou-card-glow {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.ningyou-card-glow::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, 
+        rgba(124, 140, 255, 0) 0%,
+        rgba(124, 140, 255, 0) 100%
+    );
+    z-index: -1;
+    opacity: 0;
+    transition: all 0.3s ease;
+    filter: blur(8px);
+}
+
+.ningyou-card-glow:hover::before {
+    background: linear-gradient(135deg, 
+        rgba(124, 140, 255, 0.15) 0%,
+        rgba(167, 139, 250, 0.1) 50%,
+        rgba(196, 181, 253, 0.08) 100%
+    );
+    opacity: 1;
+}
+
+.ningyou-card-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 32px rgba(124, 140, 255, 0.12),
+        0 0 0 1px rgba(124, 140, 255, 0.05);
+}
+
+.dark .ningyou-card-glow:hover::before {
+    background: linear-gradient(135deg, 
+        rgba(124, 140, 255, 0.1) 0%,
+        rgba(167, 139, 250, 0.06) 50%,
+        rgba(196, 181, 253, 0.04) 100%
+    );
+}
+
+.dark .ningyou-card-glow:hover {
+    box-shadow: 
+        0 8px 32px rgba(124, 140, 255, 0.08),
+        0 0 0 1px rgba(124, 140, 255, 0.03);
 }

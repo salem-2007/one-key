@@ -2,11 +2,13 @@ import './env.js';
 import { createApp } from './app.js';
 import { initDb } from './db/index.js';
 import { startHealthChecker } from './services/health.js';
+import { createDefaultAdmin } from './services/auth.js';
 
 const PORT = process.env.PORT ?? 3001;
 
 async function main() {
   initDb();
+createDefaultAdmin();
   const app = createApp();
 
   app.listen(Number(PORT), '0.0.0.0', () => {

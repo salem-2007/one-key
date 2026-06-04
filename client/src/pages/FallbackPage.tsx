@@ -22,6 +22,7 @@ import { apiFetch } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { PageHeader } from '@/components/page-header'
+import { useI18n } from '@/lib/i18n'
 
 interface FallbackEntry {
   modelDbId: number
@@ -66,13 +67,7 @@ interface RoutingData {
 // A merged row: fallback-chain metadata + live bandit scores.
 type Row = FallbackEntry & Partial<RoutingScore>
 
-const STRATEGIES: { key: RoutingStrategy; label: string; blurb: string }[] = [
-  { key: 'priority', label: 'Manual', blurb: 'Route in the exact order you set below. Drag the handles to reorder. No scoring — the chain is followed top-to-bottom.' },
-  { key: 'balanced', label: 'Balanced', blurb: 'Reliability leads (50%), with speed and intelligence weighted equally (25% each). A sensible all-round default.' },
-  { key: 'smartest', label: 'Smartest', blurb: 'Prefer the most capable model that still works. Intelligence 55%, reliability 35%, speed 10%.' },
-  { key: 'fastest', label: 'Fastest', blurb: 'Prefer the fastest model that still works. Speed 55%, reliability 35%, intelligence 10%.' },
-  { key: 'reliable', label: 'Most reliable', blurb: 'Maximize success rate above all. Reliability 70%, speed and intelligence 15% each.' },
-]
+// STRATEGIES is defined inside FallbackPage so the i18n `t()` function is in scope.
 
 function formatTokens(n: number): string {
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`
@@ -163,6 +158,7 @@ function AxisBar({ value, color }: { value: number | undefined; color: string })
 }
 
 function TokenUsageBar({ data }: { data: TokenUsageData }) {
+  const { t } = useI18n()
   const { totalBudget, totalUsed, models } = data
   const remaining = Math.max(0, totalBudget - totalUsed)
   const remainingPct = totalBudget > 0 ? Math.round((remaining / totalBudget) * 100) : 0
@@ -177,11 +173,11 @@ function TokenUsageBar({ data }: { data: TokenUsageData }) {
   return (
     <section className="rounded-lg border bg-card p-5">
       <div className="flex items-baseline justify-between mb-3">
-        <h2 className="text-sm font-medium">Monthly token budget</h2>
+        <h2 className="text-sm font-medium">{t("fallback.budget.title")}</h2>
         <span className="text-xs text-muted-foreground tabular-nums">
-          <span className="text-foreground font-medium">{formatTokens(remaining)}</span> remaining
+          <span className="text-foreground font-medium">{formatTokens(remaining)}</span> {t("fallback.budget.remaining")}
           <span className="mx-1.5">·</span>
-          {remainingPct}% of {formatTokens(totalBudget)}
+          {t("fallback.budget.percentOf").replace("{total}", formatTokens(totalBudget)).replace("{percent}", String(remainingPct))}
         </span>
       </div>
 
@@ -189,7 +185,7 @@ function TokenUsageBar({ data }: { data: TokenUsageData }) {
         {modelsWithWidth.map((m, i) => (
           <div
             key={i}
-            title={`${m.displayName} (${m.platform}) — ${formatTokens(m.remainingTokens)} remaining`}
+            title={t("fallback.budget.modelTooltip").replace("{model}", m.displayName).replace("{platform}", m.platform).replace("{tokens}", formatTokens(m.remainingTokens))}
             style={{
               width: `${m.widthPct}%`,
               backgroundColor: platformColors[m.platform] ?? '#94a3b8',
@@ -198,7 +194,7 @@ function TokenUsageBar({ data }: { data: TokenUsageData }) {
         ))}
         {totalUsed > 0 && (
           <div
-            title={`Used — ${formatTokens(totalUsed)}`}
+            title={t("fallback.budget.used").replace("{tokens}", formatTokens(totalUsed))}
             className="bg-muted-foreground/30"
             style={{ width: `${usedPct}%` }}
           />
@@ -236,6 +232,7 @@ function RowContent({
   dragHandle?: ReactNode
   onToggle: (modelDbId: number, enabled: boolean) => void
 }) {
+  const { t } = useI18n()
   const guard = (row.headroom ?? 1) * (row.rateLimit ?? 1)
   return (
     <>
@@ -260,18 +257,18 @@ function RowContent({
               title="Emits structured tool calls — eligible for tool-bearing requests"
               className="text-[10px] rounded-full px-1.5 py-0.5 bg-violet-600/15 text-violet-700 dark:bg-violet-400/15 dark:text-violet-400"
             >
-              Tools
+              {t('fallback.tools')}
             </span>
           )}
           {(row.penalty ?? 0) > 0 && (
-            <span className="text-[10px] text-amber-600 dark:text-amber-400">−{row.penalty} penalty</span>
+            <span className="text-[10px] text-amber-600 dark:text-amber-400">−{row.penalty} {t('fallback.penalty')}</span>
           )}
           {row.totalRequests !== undefined && row.totalRequests > 0 && (
-            <span className="text-[10px] text-muted-foreground/60 tabular-nums">{row.totalRequests} obs</span>
+            <span className="text-[10px] text-muted-foreground/60 tabular-nums">{row.totalRequests} {t('fallback.obs')}</span>
           )}
         </div>
         <div className="text-[11px] text-muted-foreground/70 tabular-nums mt-0.5">
-          {row.monthlyTokenBudget} tok/mo
+          {row.monthlyTokenBudget} {t('fallback.tokensPerMonth')}
           {row.rpmLimit ? ` · ${row.rpmLimit} rpm` : ''}
           {row.rpdLimit ? ` · ${row.rpdLimit} rpd` : ''}
         </div>
@@ -321,7 +318,16 @@ function SortableRow({ row, rank, onToggle }: { row: Row; rank: number; onToggle
 
 export default function FallbackPage() {
   const queryClient = useQueryClient()
+  const { t } = useI18n()
   const [localEntries, setLocalEntries] = useState<FallbackEntry[] | null>(null)
+
+  const STRATEGIES: { key: RoutingStrategy; label: string; blurb: string }[] = [
+    { key: 'priority', label: t('fallback.manual'), blurb: t('fallback.manual.desc') },
+    { key: 'balanced', label: t('fallback.balanced'), blurb: t('fallback.balanced.desc') },
+    { key: 'smartest', label: t('fallback.smartest'), blurb: t('fallback.smartest.desc') },
+    { key: 'fastest', label: t('fallback.fastest'), blurb: t('fallback.fastest.desc') },
+    { key: 'reliable', label: t('fallback.reliable'), blurb: t('fallback.reliable.desc') },
+  ]
 
   const { data: entries = [], isLoading } = useQuery<FallbackEntry[]>({
     queryKey: ['fallback'],
@@ -403,27 +409,27 @@ export default function FallbackPage() {
       <tr className="text-left text-muted-foreground border-b">
         <th className="py-2 pl-3 pr-1 w-6"></th>
         <th className="py-2 pr-2 w-6 text-center font-medium">#</th>
-        <th className="py-2 pr-3 font-medium">Model</th>
+        <th className="py-2 pr-3 font-medium">{t('common.model')}</th>
         <th className="py-2 pr-3 font-medium">
-          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#22c55e' }} />Reliability</span>
+          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#22c55e' }} />{t('fallback.reliability')}</span>
         </th>
         <th className="py-2 pr-3 font-medium">
-          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#3b82f6' }} />Speed</span>
+          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#3b82f6' }} />{t('fallback.speed')}</span>
         </th>
         <th className="py-2 pr-3 font-medium">
-          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#a855f7' }} />Intelligence</span>
+          <span className="inline-flex items-center gap-1"><span className="size-2 rounded-sm" style={{ background: '#a855f7' }} />{t('fallback.intelligence')}</span>
         </th>
         <th className="py-2 pr-3 font-medium">
-          <Tooltip text="Always-on guardrails: free-quota headroom × live rate-limit penalty. Below 1.0 means the model is being held back.">
-            <span className="underline decoration-dotted underline-offset-2 cursor-help">Guardrails</span>
+          <Tooltip text={t("fallback.guardrails.tooltip")}>
+            <span className="underline decoration-dotted underline-offset-2 cursor-help">{t('fallback.guardrails')}</span>
           </Tooltip>
         </th>
         <th className="py-2 pr-3 font-medium text-right">
-          <Tooltip text="Final routing score = weighted average of the three axes, multiplied by the guardrails. Higher routes first.">
-            <span className="underline decoration-dotted underline-offset-2 cursor-help">Score</span>
+          <Tooltip text={t("fallback.score.tooltip")}>
+            <span className="underline decoration-dotted underline-offset-2 cursor-help">{t('fallback.score')}</span>
           </Tooltip>
         </th>
-        <th className="py-2 pr-3 font-medium text-right">On</th>
+        <th className="py-2 pr-3 font-medium text-right">{t('fallback.on')}</th>
       </tr>
     </thead>
   )
@@ -431,8 +437,8 @@ export default function FallbackPage() {
   return (
     <div>
       <PageHeader
-        title="Fallback chain"
-        description="Pick a routing strategy. In Manual mode you drag to set the order; the other strategies route by live score across reliability, speed and intelligence."
+        titleKey="fallback.title"
+        descKey="fallback.desc"
       />
 
       <div className="space-y-6">
@@ -442,12 +448,12 @@ export default function FallbackPage() {
         {/* Strategy selector */}
         <section className="rounded-lg border bg-card p-5">
           <div className="flex items-baseline justify-between mb-3">
-            <h2 className="text-sm font-medium">Routing strategy</h2>
+            <h2 className="text-sm font-medium">{t('fallback.routingStrategy')}</h2>
             {routing?.weights && (
               <span className="text-xs text-muted-foreground tabular-nums">
-                reliability {Math.round(routing.weights.reliability * 100)}% ·
-                {' '}speed {Math.round(routing.weights.speed * 100)}% ·
-                {' '}intelligence {Math.round(routing.weights.intelligence * 100)}%
+                {t('fallback.reliability')} {Math.round(routing.weights.reliability * 100)}% ·
+                {' '}{t('fallback.speed')} {Math.round(routing.weights.speed * 100)}% ·
+                {' '}{t('fallback.intelligence')} {Math.round(routing.weights.intelligence * 100)}%
               </span>
             )}
           </div>
@@ -472,8 +478,8 @@ export default function FallbackPage() {
 
           <p className="mt-2 text-xs text-muted-foreground">
             {isManual
-              ? 'Manual mode: requests follow the order below, top-to-bottom. Drag to reorder.'
-              : 'Scores update from live traffic. The order below is how requests are routed right now.'}
+              ? t('fallback.manualHint')
+              : t('fallback.autoHint')}
           </p>
         </section>
 
@@ -524,13 +530,13 @@ export default function FallbackPage() {
               <div className="flex justify-end gap-2">
                 <Button variant="outline" size="sm" onClick={() => setLocalEntries(null)}>Discard</Button>
                 <Button size="sm" onClick={handleSave} disabled={saveMutation.isPending}>
-                  {saveMutation.isPending ? 'Saving…' : 'Save changes'}
+                  {saveMutation.isPending ? t('fallback.saving') : t('fallback.save')}
                 </Button>
               </div>
             )}
 
             {unconfiguredPlatforms.length > 0 && (
-              <p className="text-xs text-muted-foreground">Hidden (no keys): {unconfiguredPlatforms.join(', ')}</p>
+              <p className="text-xs text-muted-foreground">{t('fallback.hiddenNoKeys')}: {unconfiguredPlatforms.join(', ')}</p>
             )}
           </>
         )}

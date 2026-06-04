@@ -50,3 +50,42 @@ modelsRouter.get('/', (_req: Request, res: Response) => {
 
   res.json(result);
 });
+
+// GET /api/models/providers — list provider metadata
+modelsRouter.get('/providers', (_req: Request, res: Response) => {
+  const db = getDb();
+  const models = db.prepare('SELECT platform, COUNT(*) as cnt FROM models WHERE enabled = 1 GROUP BY platform').all() as any[];
+  const keys = db.prepare('SELECT platform, COUNT(*) as cnt FROM api_keys WHERE enabled = 1 GROUP BY platform').all() as any[];
+  const keyMap = new Map(keys.map((k: any) => [k.platform, k.cnt]));
+  const providers = models.map((m: any) => ({
+    platform: m.platform,
+    name: m.platform,
+    configured: (keyMap.get(m.platform) ?? 0) > 0,
+    keyCount: keyMap.get(m.platform) ?? 0,
+    modelCount: m.cnt,
+    status: (keyMap.get(m.platform) ?? 0) > 0 ? 'healthy' : 'unconfigured',
+  }));
+  res.json({ providers });
+});
+
+// GET /api/models/capabilities — list model capabilities
+modelsRouter.get('/capabilities', (_req: Request, res: Response) => {
+  const db = getDb();
+  const models = db.prepare('SELECT * FROM models WHERE enabled = 1').all() as any[];
+  const keys = db.prepare('SELECT platform, COUNT(*) as cnt FROM api_keys WHERE enabled = 1 GROUP BY platform').all() as any[];
+  const configuredProviderCount = new Set(keys.map((k: any) => k.platform)).size;
+  res.json({
+    models: models.map(m => ({
+      modelId: m.model_id,
+      displayName: m.display_name,
+      platform: m.platform,
+      supportsVision: m.supports_vision === 1,
+      supportsTools: m.supports_tools === 1,
+      supportsStreaming: true,
+      intelligenceRank: m.intelligence_rank,
+      speedRank: m.speed_rank,
+    })),
+    configuredProviderCount,
+    totalModelCount: models.length,
+  });
+});

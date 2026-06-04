@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PageHeader } from '@/components/page-header'
 import { Markdown } from '@/components/markdown'
+import { useI18n } from '@/lib/i18n'
 
 interface FallbackEntry {
   modelDbId: number
@@ -35,6 +36,7 @@ export default function PlaygroundPage() {
   const [selectedModel, setSelectedModel] = useState<string>('auto')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const { t } = useI18n()
 
   const { data: keyData } = useQuery<{ apiKey: string }>({
     queryKey: ['unified-key'],
@@ -134,22 +136,22 @@ export default function PlaygroundPage() {
   }
 
   const activeModelLabel = selectedModel === 'auto'
-    ? 'Auto (fallback chain)'
+    ? t('playground.auto')
     : availableModels.find(m => m.modelId === selectedModel)?.displayName ?? selectedModel
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <PageHeader
-        title="Playground"
-        description="Send a chat completion through the router and see which provider serves it."
+        titleKey="playground.title"
+        descKey="playground.desc"
         actions={
           <>
             <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v ?? 'auto')}>
               <SelectTrigger className="w-[260px]">
-                <SelectValue />
+                <span className="flex flex-1 text-left">{selectedModel === "auto" ? t("playground.auto") : selectedModel}</span>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="auto">Auto (fallback chain)</SelectItem>
+                <SelectItem value="auto">{t('playground.auto')}</SelectItem>
                 {availableModels.map(m => (
                   <SelectItem key={m.modelDbId} value={m.modelId}>
                     <span className="flex items-center gap-2">
@@ -162,7 +164,7 @@ export default function PlaygroundPage() {
             </Select>
             {messages.length > 0 && (
               <Button variant="outline" size="sm" onClick={handleClear}>
-                Clear
+                {t('playground.clear')}
               </Button>
             )}
           </>
@@ -174,9 +176,9 @@ export default function PlaygroundPage() {
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full text-center">
               <div className="space-y-2 max-w-sm">
-                <p className="text-base font-medium">Send a message to get started.</p>
+                <p className="text-base font-medium">{t('playground.startMessage')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Using <span className="text-foreground">{activeModelLabel}</span>. Switch models in the selector above.
+                  {t('playground.usingAuto')}
                 </p>
               </div>
             </div>
@@ -232,7 +234,7 @@ export default function PlaygroundPage() {
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type a message… (⏎ to send, ⇧⏎ for newline)"
+              placeholder={t('playground.placeholder')}
               rows={1}
               className="flex-1 resize-none rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 min-h-[40px] max-h-[160px]"
               style={{ height: 'auto', overflow: 'hidden' }}
@@ -243,7 +245,7 @@ export default function PlaygroundPage() {
               }}
             />
             <Button onClick={handleSend} disabled={loading || !input.trim()} size="default">
-              {loading ? 'Sending…' : 'Send'}
+              {loading ? t('playground.thinking') : t('playground.send')}
             </Button>
           </div>
         </div>

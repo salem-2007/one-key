@@ -71,3 +71,14 @@ healthRouter.post('/check-all', async (_req: Request, res: Response) => {
   await checkAllKeys();
   res.json({ success: true });
 });
+
+// Check all keys for a platform
+healthRouter.post('/check-platform/:platform', async (req: Request, res: Response) => {
+  const { platform } = req.params;
+  const db = getDb();
+  const keys = db.prepare('SELECT id FROM api_keys WHERE platform = ?').all(platform) as { id: number }[];
+  for (const k of keys) {
+    await checkKeyHealth(k.id);
+  }
+  res.json({ success: true, checked: keys.length });
+});

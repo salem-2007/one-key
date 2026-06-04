@@ -1,103 +1,180 @@
-import { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, NavLink } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState, useRef } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { Sun, Moon, LayoutDashboard, Key, AlertTriangle, Terminal, User, LogOut, ChevronLeft, ChevronRight, Languages, Zap } from 'lucide-react'
+import { apiFetch, setToken } from '@/lib/api'
+import { useI18n } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
 import { AuthGate } from '@/components/auth-gate'
-import { logout } from '@/lib/api'
 import KeysPage from '@/pages/KeysPage'
-import PlaygroundPage from '@/pages/PlaygroundPage'
+import ProvidersPage from '@/pages/ProvidersPage'
 import FallbackPage from '@/pages/FallbackPage'
 import AnalyticsPage from '@/pages/AnalyticsPage'
+import PlaygroundPage from '@/pages/PlaygroundPage'
 
-const queryClient = new QueryClient()
-
-function NavItem({ to, children }: { to: string; children: React.ReactNode }) {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        `relative text-sm px-1 py-4 transition-colors ${
-          isActive
-            ? 'text-foreground after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-foreground'
-            : 'text-muted-foreground hover:text-foreground'
-        }`
-      }
-    >
-      {children}
-    </NavLink>
-  )
-}
+const qc = new QueryClient()
 
 function DarkModeToggle() {
-  const [dark, setDark] = useState(() =>
-    typeof window !== 'undefined' && document.documentElement.classList.contains('dark')
-  )
-
-  useEffect(() => {
-    const stored = localStorage.getItem('theme')
-    if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark')
-      setDark(true)
-    }
-  }, [])
-
+  const [dark, setDark] = useState(() => {
+    try { return localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) } catch { return false }
+  })
   function toggle() {
     const next = !dark
     setDark(next)
     document.documentElement.classList.toggle('dark', next)
-    localStorage.setItem('theme', next ? 'dark' : 'light')
+    try { localStorage.setItem('theme', next ? 'dark' : 'light') } catch {}
   }
-
   return (
-    <Button variant="ghost" size="sm" onClick={toggle} aria-label="Toggle theme">
-      {dark ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-      )}
-    </Button>
+    <button onClick={toggle} className="ningyou-header-pill" title={dark ? 'Light mode' : 'Dark mode'}>
+      {dark ? <Sun size={14} /> : <Moon size={14} />}
+    </button>
   )
 }
 
-function Brand() {
+function LangToggle() {
+  const { lang, setLang } = useI18n()
   return (
-    <div className="flex items-center gap-2">
-      <span className="inline-block size-2 rounded-full bg-foreground" />
-      <span className="font-semibold tracking-tight text-sm">FreeLLMAPI</span>
-    </div>
+    <button onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')} className="ningyou-header-pill">
+      <Languages size={14} />
+      <span className="ningyou-header-pill-label">{lang === 'zh' ? 'EN' : '中文'}</span>
+    </button>
+  )
+}
+
+function Header({ collapsed }: { collapsed: boolean }) {
+  const { t } = useI18n()
+  const location = useLocation()
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const { data: me } = useQuery({ queryKey: ['me'], queryFn: () => apiFetch<{ email: string }>('/api/auth/me') })
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowMenu(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function logout() {
+    setToken(null as any)
+    window.location.reload()
+  }
+
+  const pageTitles: Record<string, string> = {
+    '/': t('nav.analytics'),
+    '/providers': t('nav.providers'),
+    '/fallback': t('nav.fallback'),
+    '/keys': t('nav.keys'),
+    '/playground': t('nav.playground'),
+  }
+  const pageTitle = pageTitles[location.pathname] || t('nav.analytics')
+
+  return (
+    <header className="ningyou-header" style={{ left: collapsed ? '88px' : '244px' }}>
+      <div className="ningyou-header-bar">
+        <div className="ningyou-header-left">
+          <div className="ningyou-header-title">
+            <span>{pageTitle}</span>
+          </div>
+        </div>
+        <div className="ningyou-header-right">
+          <div className="ningyou-header-pills-wrap">
+            <div className="ningyou-header-status">
+              <span className="ningyou-status-dot" />
+              <span>{t('header.running')}</span>
+            </div>
+            <DarkModeToggle />
+            <LangToggle />
+          </div>
+          <div className="ningyou-header-profile-wrap" ref={menuRef}>
+            <button onClick={() => setShowMenu(!showMenu)} className="ningyou-header-profile">
+              <div className="ningyou-header-avatar">
+                <User size={14} />
+              </div>
+            </button>
+            {showMenu && (
+              <div className="ningyou-header-dropdown">
+                <div className="ningyou-dropdown-user">
+                  <div className="ningyou-dropdown-avatar">
+                    <User size={18} />
+                  </div>
+                  <div>
+                    <div className="ningyou-dropdown-name">{me?.email?.split('@')[0] || 'User'}</div>
+                    <div className="ningyou-dropdown-email">{me?.email || 'user@example.com'}</div>
+                  </div>
+                </div>
+                <div className="ningyou-dropdown-divider" />
+                <button onClick={logout} className="ningyou-dropdown-item">
+                  <LogOut size={14} />
+                  <span>{t('nav.signout')}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+  const location = useLocation()
+  const { t } = useI18n()
+  const navItems = [
+    { to: '/', icon: LayoutDashboard, label: t('nav.analytics') },
+    { to: '/providers', icon: Zap, label: t('nav.providers') },
+    { to: '/fallback', icon: AlertTriangle, label: t('nav.fallback') },
+    { to: '/keys', icon: Key, label: t('nav.keys') },
+    { to: '/playground', icon: Terminal, label: t('nav.playground') },
+  ]
+
+  return (
+    <aside className={cn("ningyou-sidebar", collapsed && "collapsed")} style={{ width: collapsed ? '64px' : '220px' }}>
+      <div className="ningyou-sidebar-logo">
+        <div className="ningyou-logo-icon"><Zap size={18} /></div>
+        {!collapsed && <span className="ningyou-logo-text">ONE KEY</span>}
+      </div>
+
+      
+      <nav className="ningyou-sidebar-nav">
+        {navItems.map(item => (
+          <NavLink key={item.to} to={item.to} end={item.to === '/'} className={({ isActive }) => cn('ningyou-nav-item', isActive && 'active')}>
+            <item.icon size={18} strokeWidth={1.5} />
+            {!collapsed && <span>{item.label}</span>}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="ningyou-sidebar-actions">
+        <button onClick={onToggle} className="ningyou-account-btn" title={collapsed ? '展开' : '收起'}>
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </button>
+      </div>
+    </aside>
   )
 }
 
 function App() {
+  const [collapsed, setCollapsed] = useState(false)
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <QueryClientProvider client={qc}>
+      <BrowserRouter>
         <AuthGate>
-          <div className="min-h-screen bg-background">
-            <header className="sticky top-0 z-40 bg-background/80 backdrop-blur border-b">
-              <div className="max-w-6xl mx-auto px-6 flex items-center">
-                <Brand />
-                <nav className="flex items-center gap-6 ml-10">
-                  <NavItem to="/playground">Playground</NavItem>
-                  <NavItem to="/keys">Keys</NavItem>
-                  <NavItem to="/fallback">Fallback</NavItem>
-                  <NavItem to="/analytics">Analytics</NavItem>
-                </nav>
-                <div className="ml-auto py-2 flex items-center gap-1">
-                  <DarkModeToggle />
-                  <Button variant="ghost" size="sm" onClick={() => logout()}>Sign out</Button>
-                </div>
-              </div>
-            </header>
-            <main className="max-w-6xl mx-auto px-6 py-8">
+          <div className="ningyou-layout">
+            <div className="ningyou-glow-bg" aria-hidden="true"></div>
+            <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+            <Header collapsed={collapsed} />
+            <main className="ningyou-main" style={{ marginLeft: collapsed ? '64px' : '220px' }}>
               <Routes>
-                <Route path="/" element={<Navigate to="/playground" replace />} />
-                <Route path="/playground" element={<PlaygroundPage />} />
-                <Route path="/keys" element={<KeysPage />} />
+                <Route path="/" element={<AnalyticsPage />} />
+                <Route path="/providers" element={<ProvidersPage />} />
                 <Route path="/fallback" element={<FallbackPage />} />
-                <Route path="/analytics" element={<AnalyticsPage />} />
-                <Route path="/test" element={<Navigate to="/playground" replace />} />
-                <Route path="/health" element={<Navigate to="/keys" replace />} />
+                <Route path="/keys" element={<KeysPage />} />
+                <Route path="/playground" element={<PlaygroundPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
           </div>

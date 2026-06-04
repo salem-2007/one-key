@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+}
+
+:root {
+  --background: 220 14% 96%;
+  --foreground: 224 71% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: 224 71% 4%;
+  --primary: 220 70% 50%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 220 14% 90%;
+  --secondary-foreground: 224 71% 4%;
+  --muted: 220 14% 90%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 220 14% 90%;
+  --accent-foreground: 224 71% 4%;
+  --destructive: 0 84% 60%;
+  --border: 220 13% 87%;
+  --input: 220 13% 87%;
+  --ring: 220 70% 50%;
+}
+
+.dark {
+  --background: 224 50% 4%;
+  --foreground: 210 20% 98%;
+  --card: 224 50% 7%;
+  --card-foreground: 210 20% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 224 50% 4%;
+  --secondary: 224 40% 12%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 224 40% 12%;
+  --muted-foreground: 218 11% 55%;
+  --accent: 224 40% 12%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 63% 31%;
+  --border: 224 40% 16%;
+  --input: 224 40% 16%;
+  --ring: 217 91% 60%;
+}
+
+* { border-color: hsl(var(--border)); }
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* 毛玻璃卡片 */
+.glass {
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 16px;
+}
+
+.dark .glass {
+  background: hsl(var(--card) / 0.5);
+  border-color: hsl(var(--border) / 0.3);
+}
+
+.glass-hover {
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -12px hsl(var(--foreground) / 0.08);
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+.dark .glass-hover {
+  background: hsl(var(--card) / 0.5);
+}
+
+.dark .glass-hover:hover {
+  box-shadow: 0 20px 40px -12px hsl(var(--foreground) / 0.15);
+}
+
+.glass-sidebar {
+  background: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(24px) saturate(2);
+  border-right: 1px solid hsl(var(--border) / 0.5);
+}
+
+.dark .glass-sidebar {
+  background: hsl(var(--card) / 0.4);
+}
+
+.glass-header {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.dark .glass-header {
+  background: hsl(var(--card) / 0.3);
+}
+
+/* 动态背景 */
+.bg-mesh {
+  background:
+    radial-gradient(at 20% 20%, hsl(220 70% 50% / 0.08) 0, transparent 50%),
+    radial-gradient(at 80% 80%, hsl(280 70% 50% / 0.06) 0, transparent 50%),
+    radial-gradient(at 50% 50%, hsl(200 70% 50% / 0.04) 0, transparent 50%);
+}
+
+.dark .bg-mesh {
+  background:
+    radial-gradient(at 20% 20%, hsl(220 70% 50% / 0.12) 0, transparent 50%),
+    radial-gradient(at 80% 80%, hsl(280 70% 50% / 0.08) 0, transparent 50%),
+    radial-gradient(at 50% 50%, hsl(200 70% 50% / 0.06) 0, transparent 50%);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+}
+
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-delay-1 { animation: float 8s ease-in-out infinite 2s; }
+.animate-float-delay-2 { animation: float 10s ease-in-out infinite 4s; }
+
+/* 状态指示器 */
+.status-healthy { background: hsl(142 76% 36%); }
+.status-rate-limited { background: hsl(38 92% 50%); }
+.status-invalid { background: hsl(0 84% 60%); }
+.status-unknown { background: hsl(var(--muted-foreground) / 0.4); }

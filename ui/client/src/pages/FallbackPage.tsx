@@ -1,0 +1,607 @@
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { apiFetch } from '@/lib/api'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { PageHeader } from '@/components/page-header'
+
+interface FallbackEntry {
+  modelDbId: number
+  priority: number
+  effectivePriority: number
+  penalty: number
+  rateLimitHits: number
+  enabled: boolean
+  platform: string
+  providerDisplayName: string
+  modelId: string
+  displayName: string
+  intelligenceRank: number
+  speedRank: number
+  sizeLabel: string
+  rpmLimit: number | null
+  rpdLimit: number | null
+  monthlyTokenBudget: string
+  baseBudget: number
+  effectiveBudget: number
+  keyCount: number
+  runtimeStatus: 'healthy' | 'degraded' | 'unavailable'
+  runtimeBlockedUntil: string | null
+  lastErrorCategory: string | null
+  lastError: string | null
+  failureCount: number
+  requiresConfirmation: boolean
+}
+
+function formatTokens(n: number): string {
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`
+  return String(n)
+}
+
+interface TokenUsageData {
+  totalBudget: number
+  totalUsed: number
+  models: {
+    displayName: string
+    platform: string
+    monthlyTokenBudget: string
+    baseBudget: number
+    keyCount: number
+    effectiveBudget: number
+    budget: number
+  }[]
+}
+
+const platformColors: Record<string, string> = {
+  google:      '#4285f4',
+  groq:        '#f55036',
+  cerebras:    '#8b5cf6',
+  sambanova:   '#14b8a6',
+  nvidia:      '#76b900',
+  mistral:     '#f59e0b',
+  openrouter:  '#ec4899',
+  github:      '#6e7b8b',
+  cohere:      '#d946ef',
+  cloudflare:  '#f38020',
+  zhipu:       '#06b6d4',
+  ollama:      '#000000',
+  kilo:        '#7c3aed',
+  pollinations: '#a855f7',
+  llm7:        '#0ea5e9',
+}
+
+function formatBudgetLabel(monthlyTokenBudget: string, keyCount: number, effectiveBudget: number): string {
+  const base = `${monthlyTokenBudget} tok/mo`
+  if (keyCount > 1 && effectiveBudget > 0) return `${base} x ${keyCount} keys = ${formatTokens(effectiveBudget)}`
+  if (keyCount > 1) return `${base} x ${keyCount} keys`
+  return base
+}
+
+function formatRuntimeStatus(entry: FallbackEntry): string | null {
+  if (entry.runtimeStatus === 'healthy' && !entry.runtimeBlockedUntil) return null
+  if (entry.runtimeStatus === 'unavailable') return '不可用'
+  if (entry.runtimeBlockedUntil) return '冷却中'
+  return '降级'
+}
+
+function formatHealthReason(entry: FallbackEntry): string {
+  if (entry.lastErrorCategory === 'zero_quota') return '零配额'
+  if (entry.lastErrorCategory) return entry.lastErrorCategory.replace('_', ' ')
+  if (entry.runtimeBlockedUntil) return 'cooldown'
+  if (!entry.enabled) return '手动故障转移关闭'
+  return '正常'
+}
+
+function formatBlockedUntil(value: string | null): string | null {
+  if (!value) return null
+  const date = new Date(value.replace(' ', 'T'))
+  if (Number.isNaN(date.getTime())) return value
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function ModelHealthPanel({
+  entries,
+  onRetry,
+  onEnable,
+  retryingId,
+  toggling,
+}: {
+  entries: FallbackEntry[]
+  onRetry: (entry: FallbackEntry) => void
+  onEnable: (modelDbId: number) => void
+  retryingId: number | null
+  toggling: boolean
+}) {
+  const routableEntries = entries.filter(entry => entry.keyCount > 0)
+  const quarantined = routableEntries.filter(entry =>
+    entry.runtimeStatus !== 'healthy' || entry.runtimeBlockedUntil || entry.lastErrorCategory,
+  )
+  const manuallyDisabled = routableEntries.filter(entry =>
+    !entry.enabled && !quarantined.some(item => item.modelDbId === entry.modelDbId),
+  )
+  const hasIssues = quarantined.length > 0 || manuallyDisabled.length > 0
+
+  return (
+    <section className="rounded-lg border bg-card p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-medium">模型可用度</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            系统隔离和手动故障转移禁用。
+          </p>
+        </div>
+        <div className="flex gap-2 text-xs tabular-nums">
+          <span className="rounded-full border px-2 py-1">{quarantined.length} 个已隔离</span>
+          <span className="rounded-full border px-2 py-1">{manuallyDisabled.length} 个手动关闭</span>
+        </div>
+      </div>
+
+      {!hasIssues ? (
+        <div className="mt-4 rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+          所有故障转移模型正常。
+        </div>
+      ) : (
+        <div className="mt-4 space-y-4">
+          {quarantined.length > 0 && (
+            <HealthGroup
+              title="系统已隔离"
+              entries={quarantined}
+              actionLabel="立即重试"
+              onAction={onRetry}
+              busyId={retryingId}
+            />
+          )}
+          {manuallyDisabled.length > 0 && (
+            <HealthGroup
+              title="手动故障转移已关闭"
+              entries={manuallyDisabled}
+              actionLabel="启用"
+              onAction={(entry) => onEnable(entry.modelDbId)}
+              busyId={toggling ? -1 : null}
+            />
+          )}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function HealthGroup({
+  title,
+  entries,
+  actionLabel,
+  onAction,
+  busyId,
+}: {
+  title: string
+  entries: FallbackEntry[]
+  actionLabel: string
+  onAction: (entry: FallbackEntry) => void
+  busyId: number | null
+}) {
+  return (
+    <div>
+      <h3 className="mb-2 text-xs font-medium uppercase text-muted-foreground">{title}</h3>
+      <div className="divide-y rounded-md border">
+        {entries.map(entry => (
+          <div key={`${title}:${entry.modelDbId}`} className="flex flex-wrap items-center gap-3 p-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="truncate text-sm font-medium">{entry.displayName}</span>
+                <span className="rounded-full border px-2 py-0.5 text-xs text-muted-foreground">
+                  {entry.providerDisplayName}
+                </span>
+                <span className="text-xs text-muted-foreground">{formatHealthReason(entry)}</span>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="font-mono">{entry.modelId}</span>
+                {entry.failureCount > 0 && <span>{entry.failureCount} 次失败</span>}
+                {entry.requiresConfirmation && <span>需要确认</span>}
+                {formatBlockedUntil(entry.runtimeBlockedUntil) && (
+                  <span>冷却至 {formatBlockedUntil(entry.runtimeBlockedUntil)}</span>
+                )}
+              </div>
+              {entry.lastError && (
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{entry.lastError}</p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onAction(entry)}
+              disabled={busyId === entry.modelDbId || busyId === -1}
+            >
+              {busyId === entry.modelDbId || busyId === -1
+                ? '处理中…'
+                : entry.requiresConfirmation && actionLabel === '立即重试'
+                  ? '确认重试'
+                  : actionLabel}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function TokenUsageBar({ data }: { data: TokenUsageData }) {
+  const { totalBudget, totalUsed, models } = data
+  const remaining = Math.max(0, totalBudget - totalUsed)
+  const remainingPct = totalBudget > 0 ? Math.round((remaining / totalBudget) * 100) : 0
+
+  // Scale each model's segment proportionally so the colored portion of the
+  // bar sums to `remaining`; the grey tail represents what's been used.
+  const modelsWithWidth = models.map(m => ({
+    ...m,
+    remainingTokens: totalBudget > 0 ? (m.effectiveBudget / totalBudget) * remaining : 0,
+    widthPct: totalBudget > 0 ? (m.effectiveBudget / totalBudget) * (remaining / totalBudget) * 100 : 0,
+  }))
+  const usedPct = totalBudget > 0 ? (totalUsed / totalBudget) * 100 : 0
+
+  return (
+    <section className="rounded-lg border bg-card p-5">
+      <div className="flex items-baseline justify-between mb-3">
+        <h2 className="text-sm font-medium">月度 Token 预算</h2>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          <span className="text-foreground font-medium">{formatTokens(remaining)}</span> 剩余
+          <span className="mx-1.5">·</span>
+          {remainingPct}% 共 {formatTokens(totalBudget)}
+        </span>
+      </div>
+
+      <div className="flex h-2.5 rounded-full overflow-hidden bg-muted">
+        {modelsWithWidth.map((m, i) => (
+          <div
+            key={i}
+            title={`${m.displayName} (${m.platform}) - ${formatBudgetLabel(m.monthlyTokenBudget, m.keyCount, m.effectiveBudget)}; ${formatTokens(m.remainingTokens)} 剩余`}
+            style={{
+              width: `${m.widthPct}%`,
+              backgroundColor: platformColors[m.platform] ?? '#94a3b8',
+            }}
+          />
+        ))}
+        {totalUsed > 0 && (
+          <div
+            title={`已用 - ${formatTokens(totalUsed)}`}
+            className="bg-muted-foreground/30"
+            style={{ width: `${usedPct}%` }}
+          />
+        )}
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-1.5 text-xs tabular-nums">
+        {modelsWithWidth.map((m, i) => (
+          <div key={i} className="flex items-center gap-2 min-w-0">
+            <span
+              className="size-2 rounded-sm flex-shrink-0"
+              style={{ backgroundColor: platformColors[m.platform] ?? '#94a3b8' }}
+            />
+            <span className="truncate">{m.displayName}</span>
+            {m.keyCount > 1 && (
+              <span className="text-muted-foreground">x{m.keyCount}</span>
+            )}
+            <span className="flex-1" />
+            <span className="font-mono text-muted-foreground">{formatTokens(m.remainingTokens)}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function SortableModelRow({
+  entry,
+  index,
+  onToggle,
+}: {
+  entry: FallbackEntry
+  index: number
+  onToggle: (modelDbId: number, enabled: boolean) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: entry.modelDbId,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-center gap-3 px-4 py-3 bg-card ${isDragging ? 'opacity-50' : ''} ${entry.enabled ? '' : 'opacity-50'}`}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-foreground transition-colors"
+        aria-label="拖拽以重新排序"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="9" cy="6" r="1.5" /><circle cx="15" cy="6" r="1.5" />
+          <circle cx="9" cy="12" r="1.5" /><circle cx="15" cy="12" r="1.5" />
+          <circle cx="9" cy="18" r="1.5" /><circle cx="15" cy="18" r="1.5" />
+        </svg>
+      </button>
+      <span className="text-xs font-mono text-muted-foreground w-5 tabular-nums">{index + 1}</span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-medium text-sm">{entry.displayName}</span>
+          <span className="text-xs text-muted-foreground">{entry.platform}</span>
+          {entry.penalty > 0 && (
+            <span className="text-xs text-amber-600 dark:text-amber-400">
+              −{entry.penalty} penalty
+            </span>
+          )}
+          {formatRuntimeStatus(entry) && (
+            <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-300">
+              {formatRuntimeStatus(entry)}
+            </span>
+          )}
+        </div>
+        <div className="flex gap-3 mt-0.5 text-xs text-muted-foreground tabular-nums">
+          <span>智力 #{entry.intelligenceRank}</span>
+          <span>速度 #{entry.speedRank}</span>
+          {entry.rpmLimit && <span>{entry.rpmLimit} 次/分</span>}
+          {entry.rpdLimit && <span>{entry.rpdLimit} 次/天</span>}
+          <span>{formatBudgetLabel(entry.monthlyTokenBudget, entry.keyCount, entry.effectiveBudget)}</span>
+          {entry.lastErrorCategory && (
+            <span>{entry.lastErrorCategory.replace('_', ' ')}</span>
+          )}
+        </div>
+      </div>
+      <Switch
+        checked={entry.enabled}
+        onCheckedChange={(checked) => onToggle(entry.modelDbId, checked)}
+      />
+    </div>
+  )
+}
+
+export default function FallbackPage() {
+  const queryClient = useQueryClient()
+  const [localEntries, setLocalEntries] = useState<FallbackEntry[] | null>(null)
+  const [retryingId, setRetryingId] = useState<number | null>(null)
+
+  const { data: entries = [], isLoading } = useQuery<FallbackEntry[]>({
+    queryKey: ['fallback'],
+    queryFn: () => apiFetch('/api/fallback'),
+  })
+
+  const { data: tokenUsage } = useQuery<TokenUsageData>({
+    queryKey: ['fallback', 'token-usage'],
+    queryFn: () => apiFetch('/api/fallback/token-usage'),
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: (data: { modelDbId: number; priority: number; enabled: boolean }[]) =>
+      apiFetch('/api/fallback', { method: 'PUT', body: JSON.stringify(data) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fallback'] })
+      setLocalEntries(null)
+    },
+  })
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ modelDbId, enabled }: { modelDbId: number; enabled: boolean }) =>
+      apiFetch(`/api/fallback/${modelDbId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ enabled }),
+      }),
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['fallback'] })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fallback'] })
+    },
+  })
+
+  const retryMutation = useMutation({
+    mutationFn: ({ modelDbId, confirm }: { modelDbId: number; confirm: boolean }) =>
+      apiFetch(`/api/fallback/${modelDbId}/retry`, {
+        method: 'POST',
+        body: JSON.stringify({ confirm }),
+      }),
+    onMutate: ({ modelDbId }) => {
+      setRetryingId(modelDbId)
+    },
+    onSettled: () => {
+      setRetryingId(null)
+      queryClient.invalidateQueries({ queryKey: ['fallback'] })
+    },
+  })
+
+  const sortMutation = useMutation({
+    mutationFn: (preset: string) =>
+      apiFetch(`/api/fallback/sort/${preset}`, { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fallback'] })
+      setLocalEntries(null)
+    },
+  })
+
+  const allEntries = localEntries ?? entries
+  const displayEntries = allEntries.filter(e => e.keyCount > 0)
+  const unconfiguredPlatforms = [...new Set(allEntries.filter(e => e.keyCount === 0).map(e => e.platform))]
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = displayEntries.findIndex(e => e.modelDbId === active.id)
+    const newIndex = displayEntries.findIndex(e => e.modelDbId === over.id)
+    const reorderedVisible = arrayMove(displayEntries, oldIndex, newIndex)
+    const unconfigured = allEntries.filter(e => e.keyCount === 0)
+    const merged = [
+      ...reorderedVisible.map((e, i) => ({ ...e, priority: i + 1 })),
+      ...unconfigured.map((e, i) => ({ ...e, priority: reorderedVisible.length + i + 1 })),
+    ]
+    setLocalEntries(merged)
+  }
+
+  function handleToggle(modelDbId: number, enabled: boolean) {
+    const updated = allEntries.map(e =>
+      e.modelDbId === modelDbId ? { ...e, enabled } : e
+    )
+    if (localEntries) {
+      setLocalEntries(updated)
+    } else {
+      queryClient.setQueryData<FallbackEntry[]>(['fallback'], old =>
+        old?.map(e => e.modelDbId === modelDbId ? { ...e, enabled } : e)
+      )
+    }
+    toggleMutation.mutate({ modelDbId, enabled })
+  }
+
+  function handleRetry(entry: FallbackEntry) {
+    if (entry.requiresConfirmation) {
+      const confirmed = window.confirm(
+        `${entry.displayName} 已被隔离，因为提供者报告配额为零。请确认此账号或项目对 ${entry.modelId} 有配额后再重试。`
+      )
+      if (!confirmed) return
+    }
+
+    const modelDbId = entry.modelDbId
+    queryClient.setQueryData<FallbackEntry[]>(['fallback'], old =>
+      old?.map(e => e.modelDbId === modelDbId
+        ? {
+          ...e,
+          runtimeStatus: 'healthy',
+          runtimeBlockedUntil: null,
+          lastErrorCategory: null,
+          lastError: null,
+          failureCount: 0,
+          requiresConfirmation: false,
+        }
+        : e)
+    )
+    retryMutation.mutate({ modelDbId, confirm: entry.requiresConfirmation })
+  }
+
+  function handleSave() {
+    if (!localEntries) return
+    saveMutation.mutate(
+      allEntries.map(e => ({
+        modelDbId: e.modelDbId,
+        priority: e.priority,
+        enabled: e.enabled,
+      }))
+    )
+  }
+
+  const hasChanges = localEntries !== null
+
+  return (
+    <div>
+      <PageHeader
+        title="故障转移"
+        description="拖拽排序，请求从上到下依次尝试模型直到成功。"
+        actions={
+          <>
+            <Button variant="outline" size="sm" onClick={() => sortMutation.mutate('intelligence')} disabled={sortMutation.isPending}>
+              按智能排序
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => sortMutation.mutate('speed')} disabled={sortMutation.isPending}>
+              按速度排序
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => sortMutation.mutate('budget')} disabled={sortMutation.isPending}>
+              按预算排序
+            </Button>
+          </>
+        }
+      />
+
+      <div className="space-y-6">
+        {tokenUsage && tokenUsage.totalBudget > 0 && (
+          <TokenUsageBar data={tokenUsage} />
+        )}
+
+        {!isLoading && allEntries.length > 0 && (
+          <ModelHealthPanel
+            entries={allEntries}
+            onRetry={handleRetry}
+            onEnable={(modelDbId) => handleToggle(modelDbId, true)}
+            retryingId={retryingId}
+            toggling={toggleMutation.isPending}
+          />
+        )}
+
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">加载中...</p>
+        ) : displayEntries.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              暂无可用模型，请先在<a href="/keys" className="underline text-foreground">密钥页面</a>添加密钥。
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="rounded-lg border divide-y overflow-hidden">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={displayEntries.map(e => e.modelDbId)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {displayEntries.map((entry, index) => (
+                    <SortableModelRow
+                      key={entry.modelDbId}
+                      entry={entry}
+                      index={index}
+                      onToggle={handleToggle}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            </div>
+
+            {hasChanges && (
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => setLocalEntries(null)}>
+                  放弃更改
+                </Button>
+                <Button size="sm" onClick={handleSave} disabled={saveMutation.isPending}>
+                  {saveMutation.isPending ? '保存中...' : '保存排序'}
+                </Button>
+              </div>
+            )}
+
+            {unconfiguredPlatforms.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                已隐藏（无密钥）： {unconfiguredPlatforms.join(', ')}
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
