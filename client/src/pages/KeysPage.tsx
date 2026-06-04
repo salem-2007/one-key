@@ -8,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { PageHeader } from '@/components/page-header'
 import type { ApiKey, Platform } from '../../../shared/types'
-import { Pencil, ExternalLink } from 'lucide-react'
-import { formatSqliteUtcToLocalTime } from '@/lib/utils'
+import { Plus, Trash2, RefreshCw, Eye, EyeOff, CheckCircle, XCircle, Clock, Copy, ExternalLink } from 'lucide-react'
+// import { formatSqliteUtcToLocalTime } from '@/lib/utils'
 import { useI18n } from '@/lib/i18n'
 
 // Small "Get API key" external link shown next to a provider (#137).
@@ -245,13 +245,7 @@ export default function KeysPage() {
     },
   })
 
-  const checkKey = useMutation({
-    mutationFn: (keyId: number) => apiFetch(`/api/health/check/${keyId}`, { method: 'POST' }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['health'] })
-      queryClient.invalidateQueries({ queryKey: ['keys'] })
-    },
-  })
+
   const checkPlatformAll = useMutation({
     mutationFn: (platform: string) => apiFetch(`/api/health/check-platform/${platform}`, { method: 'POST' }),
     onSuccess: () => {
@@ -286,17 +280,17 @@ export default function KeysPage() {
     },
   })
 
-  function startEditing(key: ApiKey) {
+  function _startEditing(key: ApiKey) {
     setEditingKeyId(key.id)
     setEditingLabel(key.label)
   }
 
-  function cancelEditing() {
+  function _cancelEditing() {
     setEditingKeyId(null)
     setEditingLabel('')
   }
 
-  function saveEditing(id: number) {
+  function _saveEditing(id: number) {
     if (editingLabel !== undefined) {
       updateKey.mutate({ id, label: editingLabel })
     }
@@ -372,7 +366,7 @@ export default function KeysPage() {
           <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 rounded-lg border p-4 bg-card">
             <div className="space-y-1.5">
               <Label className="text-xs">{t('keys.platform')}</Label>
-              <Select value={platform} onValueChange={(v) => setPlatform(v as Platform)}>
+              <Select value={platform} onValueChange={(v: string) => setPlatform(v as Platform)}>
                 <SelectTrigger className="w-[220px]">
                   <SelectValue placeholder={t('keys.selectProvider')} />
                 </SelectTrigger>
@@ -446,7 +440,7 @@ export default function KeysPage() {
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={g.keys[0]?.enabled ?? true}
-                        onCheckedChange={(enabled) => togglePlatform.mutate({ platform: g.value, enabled })}
+                        onCheckedChange={(enabled: boolean) => togglePlatform.mutate({ platform: g.value, enabled })}
                       />
                       <Button variant="outline" size="sm" onClick={() => checkPlatformAll.mutate(g.value)}>
                         {t('keys.check')}

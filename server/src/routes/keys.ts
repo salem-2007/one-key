@@ -124,7 +124,8 @@ keysRouter.post('/', (req: Request, res: Response) => {
         url = 'https://api.cohere.ai/compatibility/v1/models';
         headers['Authorization'] = `Bearer ${keyToStore}`;
       } else {
-        const baseUrl = provider.baseUrl;
+        const baseUrl = (provider as any).baseUrl;
+        if (!baseUrl) return;
         url = baseUrl.endsWith('/v1') ? `${baseUrl}/models` : `${baseUrl}/v1/models`;
         headers['Authorization'] = `Bearer ${keyToStore}`;
       }
@@ -361,7 +362,7 @@ keysRouter.patch('/:id', (req: Request, res: Response) => {
 
 // Fetch available models for a specific key
 keysRouter.post('/:id/fetch-models', async (req: Request, res: Response) => {
-  const keyId = parseInt(req.params.id, 10);
+  const keyId = parseInt(req.params.id as string, 10);
   if (isNaN(keyId)) {
     res.status(400).json({ error: { message: 'Invalid key ID' } });
     return;
@@ -382,7 +383,7 @@ keysRouter.post('/:id/fetch-models', async (req: Request, res: Response) => {
 
   try {
     const apiKey = decrypt(row.encrypted_key, row.iv, row.auth_tag);
-    const baseUrl = row.base_url || provider.baseUrl;
+    const baseUrl = row.base_url || (provider as any).baseUrl;
     
     // 构建模型列表API URL
     let url: string;

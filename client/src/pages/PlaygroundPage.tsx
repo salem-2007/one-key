@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select'
 import { PageHeader } from '@/components/page-header'
 import { Markdown } from '@/components/markdown'
 import { useI18n } from '@/lib/i18n'
@@ -135,9 +135,7 @@ export default function PlaygroundPage() {
     inputRef.current?.focus()
   }
 
-  const activeModelLabel = selectedModel === 'auto'
-    ? t('playground.auto')
-    : availableModels.find(m => m.modelId === selectedModel)?.displayName ?? selectedModel
+
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">

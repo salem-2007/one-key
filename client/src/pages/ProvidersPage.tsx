@@ -67,8 +67,8 @@ export default function ProvidersPage() {
   })
 
   const healthKeyMap = new Map<string, any>()
-  if (healthData?.byKeyId) {
-    for (const h of healthData.byKeyId) {
+  if (healthData) {
+    for (const h of (healthData as any) || []) {
       healthKeyMap.set(h.keyId, h)
     }
   }
@@ -200,7 +200,7 @@ export default function ProvidersPage() {
                     {/* Toggle */}
                     <Switch
                       checked={group.enabled}
-                      onCheckedChange={(checked) =>
+                      onCheckedChange={(checked: boolean) =>
                         togglePlatform.mutate({ platform: group.platform, enabled: checked })
                       }
                       disabled={togglePlatform.isPending}
