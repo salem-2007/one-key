@@ -55,22 +55,22 @@
 
 | 供应商 | 免费额度 | 备注 |
 |--------|----------|------|
-| **Google Gemini** | ✅ 免费层 | Gemini 2.5/2.0 系列 |
-| **Groq** | ✅ 免费层 | 极速推理 |
-| **Cerebras** | ✅ 免费层 | 超快推理 |
-| **SambaNova** | ✅ 免费层 | 高性能推理 |
-| **NVIDIA** | ✅ 免费层 | 多模型支持 |
-| **Mistral** | ✅ 免费层 | 欧洲领先模型 |
+| **Google Gemini** | ✅ 免费 | Gemini 2.5/2.0 系列 |
+| **Groq** | ✅ 免费 | 极速推理 |
+| **Cerebras** | ✅ 免费 | 超快推理 |
+| **SambaNova** | ✅ 免费 | 高性能推理 |
+| **NVIDIA** | ✅ 免费 | 多模型支持 |
+| **Mistral** | ✅ 免费 | 欧洲领先模型 |
 | **OpenRouter** | ✅ 免费模型 | 聚合多供应商 |
-| **GitHub Models** | ✅ 免费层 | GitHub 账号即可 |
-| **Cohere** | ✅ 免费层 | 企业级模型 |
-| **Cloudflare Workers AI** | ✅ 免费层 | 边缘推理 |
-| **智谱 AI** | ✅ 免费层 | 国产大模型 |
+| **GitHub Models** | ✅ 免费 | GitHub 账号即可 |
+| **Cohere** | ✅ 免费 | 企业级模型 |
+| **Cloudflare Workers AI** | ✅ 免费 | 边缘推理 |
+| **智谱 AI** | ✅ 免费 | 国产大模型 |
 | **Ollama** | ✅ 完全免费 | 本地运行 |
-| **HuggingFace** | ✅ 免费层 | 开源模型 |
+| **HuggingFace** | ✅ 免费 | 开源模型 |
 | **Pollinations** | ✅ 完全免费 | 无需密钥 |
 | **LLM7** | ✅ 完全免费 | 无需密钥 |
-| **Kilo** | ✅ 免费层 | 多模型 |
+| **Kilo** | ✅ 免费 | 多模型 |
 | **自定义** | - | 任何 OpenAI 兼容 API |
 
 ---
